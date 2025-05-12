@@ -28,9 +28,9 @@ jobs:
             git \
             python3 \
             python3-pip \
-            qt5-default \
-            libqt5svg5-dev \
             qtbase5-dev \
+            qt5-qmake \
+            libqt5svg5-dev \
             qtbase5-dev-tools \
             libssl-dev \
             zlib1g-dev \
