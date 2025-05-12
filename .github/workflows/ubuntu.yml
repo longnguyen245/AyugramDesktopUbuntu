@@ -1,0 +1,48 @@
+name: AyuGramDesktop CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone the AyuGramDesktop repository with submodules, without history
+      - name: Clone repository
+        run: |
+          git clone --recursive --depth 1 https://github.com/AyuGram/AyuGramDesktop.git tdesktop
+
+      # Install Poetry
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # Prepare libraries
+      - name: Prepare libraries
+        run: |
+          ./Telegram/build/prepare/linux.sh
+        working-directory: tdesktop
+
+      # Build the project using Docker
+      - name: Build AyuGramDesktop
+        run: |
+          docker run --rm -it \
+            -u $(id -u) \
+            -v "$PWD:/usr/src/tdesktop" \
+            ghcr.io/telegramdesktop/tdesktop/centos_env:latest \
+            /usr/src/tdesktop/Telegram/build/docker/centos_env/build.sh \
+            -D TDESKTOP_API_ID=2040 \
+            -D TDESKTOP_API_HASH=b18441a1ff607e10a989891a5462e627
+        working-directory: tdesktop
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ayugramdesktop-build
+          path: tdesktop/out/
